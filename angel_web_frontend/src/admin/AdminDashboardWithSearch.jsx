@@ -23,7 +23,7 @@ export default function AdminDashboardWithSearch() {
 
   const fetchInquiries = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/inquiries');
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/inquiries`);
       const data = await response.json();
       setInquiries(data);
     } catch (error) {

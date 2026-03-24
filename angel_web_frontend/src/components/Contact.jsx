@@ -44,7 +44,7 @@ export default function Contact() {
   const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
-      await fetch('http://localhost:8000/api/inquiries', {
+      await fetch(`${import.meta.env.VITE_API_URL}/inquiries`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
