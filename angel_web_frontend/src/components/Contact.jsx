@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from './ui/form';
 
-
 const contactSchema = z.object({
   name: z.string().min(2, 'Name is required'),
   mobile: z.string()
@@ -43,6 +42,9 @@ export default function Contact() {
 
   const onSubmit = async (data) => {
     setIsSubmitting(true);
+
+    const eventId = Date.now(); // 🔥 unique tracking id
+
     try {
       await fetch(`${import.meta.env.VITE_API_URL}/inquiries`, {
         method: 'POST',
@@ -50,13 +52,28 @@ export default function Contact() {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...data,
+          event_id: eventId, // 🔁 send to backend
+        }),
       });
 
-      // With no-cors, we can't see the response body, but the browser sends the request.
-      // Usually, if it doesn't throw, it was sent.
+      // ✅ FIRE META EVENT AFTER SUCCESS
+      if (window.fbq) {
+        window.fbq(
+          'track',
+          'Lead',
+          {
+            content_name: 'Contact Form',
+            content_category: 'Computer Course',
+          },
+          { eventID: eventId }
+        );
+      }
+
       toast.success('Inquiry submitted successfully! We will contact you soon.');
       form.reset();
+
     } catch (error) {
       console.error('Submission error:', error);
       toast.error('Something went wrong. Please try again or call us directly.');
@@ -69,20 +86,23 @@ export default function Contact() {
     <section id="contact" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent animate-in fade-in slide-in-from-bottom duration-700">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
             Contact Us
           </h2>
-          <p className="text-gray-600 text-lg animate-in fade-in slide-in-from-bottom duration-700 delay-100">
+          <p className="text-gray-600 text-lg">
             Get in touch with us to start your learning journey
           </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          {/* Native Inquiry Form */}
-          <div className="bg-white rounded-2xl shadow-xl p-8 border border-purple-50 animate-in fade-in slide-in-from-left duration-700">
+          
+          {/* Form */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 border border-purple-50">
             <h3 className="text-2xl font-bold text-gray-800 mb-6">Send Inquiry</h3>
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+
                 <FormField
                   control={form.control}
                   name="name"
@@ -90,7 +110,7 @@ export default function Contact() {
                     <FormItem>
                       <FormLabel>Full Name *</FormLabel>
                       <FormControl>
-                        <Input placeholder="John Doe" {...field} className="focus-visible:ring-purple-500" />
+                        <Input {...field} placeholder="John Doe" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -105,16 +125,14 @@ export default function Contact() {
                       <FormLabel>Mobile Number *</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="xxxxxxxxxx"
                           {...field}
                           type="tel"
                           maxLength={10}
+                          placeholder="xxxxxxxxxx"
                           onInput={(e) => {
-                            // Replace non-numeric and limit to 10 characters
                             const val = e.target.value.replace(/[^0-9]/g, '');
                             e.target.value = val.slice(0, 10);
                           }}
-                          className="focus-visible:ring-purple-500"
                         />
                       </FormControl>
                       <FormMessage />
@@ -129,11 +147,7 @@ export default function Contact() {
                     <FormItem>
                       <FormLabel>Address *</FormLabel>
                       <FormControl>
-                        <Textarea
-                          placeholder="Your complete address"
-                          className="min-h-[100px] focus-visible:ring-purple-500"
-                          {...field}
-                        />
+                        <Textarea {...field} placeholder="Your complete address" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -147,7 +161,7 @@ export default function Contact() {
                     <FormItem>
                       <FormLabel>City *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Surat" {...field} className="focus-visible:ring-purple-500" />
+                        <Input {...field} placeholder="Surat" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -161,7 +175,7 @@ export default function Contact() {
                     <FormItem>
                       <FormLabel>Interested Course *</FormLabel>
                       <FormControl>
-                        <Input placeholder="Graphics, Web, Video..." {...field} className="focus-visible:ring-purple-500" />
+                        <Input {...field} placeholder="Graphics, Web, Video..." />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -171,12 +185,7 @@ export default function Contact() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  onClick={() => {
-                    if (window.fbq) {
-                      window.fbq('track', 'Lead');
-                    }
-                  }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-bold py-6 rounded-xl shadow-lg transition-all duration-300 transform hover:scale-[1.02]"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold py-6 rounded-xl"
                 >
                   {isSubmitting ? (
                     <>
@@ -190,65 +199,34 @@ export default function Contact() {
                     </>
                   )}
                 </Button>
+
               </form>
             </Form>
           </div>
 
-
-          {/* Contact Information */}
+          {/* Contact Info */}
           <div className="space-y-6">
             <div className="bg-gradient-to-br from-purple-50 to-pink-50 rounded-2xl p-8 border border-purple-100">
               <h3 className="text-2xl font-bold text-gray-800 mb-6">Get In Touch</h3>
 
               <div className="space-y-6">
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <MapPin className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-1">Address</h4>
-                    <p className="text-gray-600">
-                      60, Ishwarkrupa Society-3,<br />
-                      1st Floor, L.H. Road, Varachha, Surat<br />
-                      Gujarat, India
-                    </p>
-                  </div>
+                  <MapPin className="h-6 w-6 text-purple-500" />
+                  <p>Varachha, Surat, Gujarat</p>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <Phone className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-1">Phone</h4>
-                    <p className="text-gray-600">
-                      +91 88663 38688<br />
-                      +91 81281 66631
-                    </p>
-                  </div>
+                  <Phone className="h-6 w-6 text-purple-500" />
+                  <p>+91 8866338688</p>
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800 mb-1">Email</h4>
-                    <p className="text-gray-600">
-                      info@angelmultimedia.com
-                    </p>
-                  </div>
+                  <Mail className="h-6 w-6 text-purple-500" />
+                  <p>info@angelmultimedia.com</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl p-8 shadow-lg">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">Office Hours</h3>
-              <div className="space-y-2 text-gray-600">
-                <p><span className="font-semibold">Monday - Saturday:</span> 9:00 AM - 10:00 PM</p>
-                <p><span className="font-semibold">Sunday:</span> Closed</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

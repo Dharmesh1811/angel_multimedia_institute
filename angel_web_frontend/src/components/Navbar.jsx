@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ChevronDown, LogOut, Menu, X } from 'lucide-react';
+import { ChevronDown, LogOut, Menu, Sparkles, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from './ui/button';
 import logo from '../assets/logo.png';
@@ -47,7 +47,7 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-3">
           {/* Logo */}
           <div className="flex items-center gap-3">
             <img src={logo} alt="Angel Multimedia Logo" className="h-12 w-auto object-contain" />
@@ -79,7 +79,8 @@ export default function Header() {
                 onClick={() => scrollToSection('SummerOffer')}
                 className="relative bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-black shadow-lg hover:shadow-yellow-400/50 hover:shadow-xl transition-all duration-300 border-1 border-yellow-300 animate-zoom-in-out"
               >
-                🌞 SUMMER OFFER
+                <Sparkles className="mr-2 h-4 w-4" />
+                SUMMER OFFER
               </Button>
             </div>
             {loggedIn ? (
@@ -141,18 +142,34 @@ export default function Header() {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="lg:hidden p-2"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+          <div className="flex items-center gap-2 lg:hidden">
+            <Button
+              onClick={() => {
+                if (window.fbq) {
+                  window.fbq('trackCustom', 'SummerOfferClick');
+                }
+                scrollToSection('SummerOffer');
+              }}
+              className="h-9 rounded-md border border-yellow-200 bg-gradient-to-r from-amber-400 via-orange-500 to-orange-600 px-3 text-[11px] font-extrabold text-white shadow-sm shadow-orange-200/70 transition-all duration-300 hover:from-amber-500 hover:via-orange-500 hover:to-orange-700"
+            >
+              <Sparkles className="mr-1.5 h-3.5 w-3.5" />
+              SUMMER OFFER
+            </Button>
+
+            {/* Mobile Menu Button */}
+            <button
+              className="p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <nav className="lg:hidden mt-4 pb-4 flex flex-col gap-3">
+          <div className="lg:hidden mt-4 pb-4">
+            <nav className="flex flex-col gap-3">
             <button onClick={() => scrollToSection('home')} className="text-left py-2 text-gray-700 hover:text-purple-600 transition-colors">
               Home
             </button>
@@ -171,17 +188,6 @@ export default function Header() {
             <button onClick={() => scrollToSection('contact')} className="text-left py-2 text-gray-700 hover:text-purple-600 transition-colors">
               Contact
             </button>
-            <Button
-              onClick={() => {
-                if (window.fbq) {
-                  window.fbq('trackCustom', 'SummerOfferClick');
-                }
-                scrollToSection('SummerOffer'); 
-              }}
-              className="bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white font-black animate-zoom-in-out"
-            >
-              🌞 SUMMER OFFER
-            </Button>
             {loggedIn ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -250,7 +256,8 @@ export default function Header() {
             >
               Enroll Now
             </Button>
-          </nav>
+            </nav>
+          </div>
         )}
       </div>
     </header>
